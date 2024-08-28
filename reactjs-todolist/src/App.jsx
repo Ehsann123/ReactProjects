@@ -1,57 +1,84 @@
-import { useState, useEffect } from "react"
-import TodoInput from "./components/TodoInput"
-import TodoList from "./components/TodoList"
+import { useState, useEffect } from "react";
+import TodoInput from "./components/TodoInput";
+import TodoList from "./components/TodoList";
+import LoginPage from "../src/components/pages/Login";
+import RegisterPage from "../src/components/pages/Register";
 
 function App() {
-  const [todos, setTodos] = useState([])
-  const [todoValue, setTodoValue] = useState('')
+  const [todos, setTodos] = useState([]);
+  const [todoValue, setTodoValue] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentPage, setCurrentPage] = useState('register');
 
   function persistData(newList) {
-    localStorage.setItem('todos', JSON.stringify({ todos: newList }))
+    localStorage.setItem('todos', JSON.stringify({ todos: newList }));
   }
 
   function handleAddTodos(newTodo) {
-    const newTodoList = [...todos, newTodo]
-    persistData(newTodoList)
-    setTodos(newTodoList)
+    const newTodoList = [...todos, newTodo];
+    persistData(newTodoList);
+    setTodos(newTodoList);
   }
 
   function handleDeleteTodo(index) {
     const newTodoList = todos.filter((todo, todoIndex) => {
-      return todoIndex !== index
-    })
-    persistData(newTodoList)
-    setTodos(newTodoList)
+      return todoIndex !== index;
+    });
+    persistData(newTodoList);
+    setTodos(newTodoList);
   }
 
   function handleEditTodo(index) {
-    const valueToBeEdited = todos[index]
-    setTodoValue(valueToBeEdited)
-    handleDeleteTodo(index)
+    const valueToBeEdited = todos[index];
+    setTodoValue(valueToBeEdited);
+    handleDeleteTodo(index);
   }
 
   useEffect(() => {
     if (!localStorage) {
-      return
+      return;
     }
 
-    let localTodos = localStorage.getItem('todos')
+    let localTodos = localStorage.getItem('todos');
     if (!localTodos) {
-      return
+      return;
     }
 
-    console.log(localTodos)
-    localTodos = JSON.parse(localTodos).todos
-    setTodos(localTodos)
+    console.log(localTodos);
+    localTodos = JSON.parse(localTodos).todos;
+    setTodos(localTodos);
+  }, []);
 
-  }, [])
+  function handleLogin() {
+    setIsAuthenticated(true);
+    setCurrentPage('todo');
+  }
+
+  function handleRegister() {
+    setCurrentPage('login');
+  }
+
+  function handleLogout() {
+    setIsAuthenticated(false);
+    setCurrentPage('register');
+  }
 
   return (
     <>
-      <TodoInput todoValue={todoValue} setTodoValue={setTodoValue} handleAddTodos={handleAddTodos} />
-      <TodoList handleEditTodo={handleEditTodo} handleDeleteTodo={handleDeleteTodo} todos={todos} />
+      {currentPage === 'register' && (
+        <RegisterPage handleRegister={handleRegister} />
+      )}
+      {currentPage === 'login' && (
+        <LoginPage handleLogin={handleLogin} handleLogout={handleLogout} />
+      )}
+      {currentPage === 'todo' && isAuthenticated && (
+        <>
+          <TodoInput todoValue={todoValue} setTodoValue={setTodoValue} handleAddTodos={handleAddTodos} />
+          <TodoList handleEditTodo={handleEditTodo} handleDeleteTodo={handleDeleteTodo} todos={todos} />
+        </>
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
